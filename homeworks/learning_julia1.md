@@ -43,11 +43,9 @@ Answers here should be pasted into the Markdown file.  If you need an introducti
 
 1. Show how you access the help from the REPL on `+`, and then demonstrate two ways of using `+`.  (Use the REPL; in this case, the VS Code documentation browser may be more confusing than helpful.) Paste your answer below:
 
-julia```
-  ?+
-  1+20
-  +(1,20)
-```
+        ?+
+        1+20
+        +(1,20)
 
 2. Read the help on the `include` function; the `[]` around `mapexpr` represents optional arguments (you can ignore `mapexpr`, it is used only in very special circumstances).   Note that this is another way to run code, in addition to the methods described on the VS Code page.  (No response is needed for this "question.")
 
@@ -55,7 +53,7 @@ julia```
    - Add the XKCD package
    - Having read the documentation on GitHub, use the package to retrieve the most recent comic and paste its "img" URL here:
    
-   "img": "https://imgs.xkcd.com/comics/chemicals.png"
+   https://imgs.xkcd.com/comics/chemicals.png
    ![latest XKCD comic](https://imgs.xkcd.com/comics/chemicals.png)
    
    - Many packages have their documentation in "Documenter" form. Do a web search to find the main documentation for "Dataframes.jl" and paste its URL here:
@@ -63,9 +61,9 @@ julia```
    https://dataframes.juliadata.org/stable/
 
 4. Use a comprehension to list all odd integers between 1 and 20 (inclusive). The `isodd` function can test if a number is odd. Paste your code below:
-
-`goods = [i for i ∈ 1:2:20]`
-`goods = [i for i in filter(isodd, 1:20)]`
+    
+        goods = [i for i ∈ 1:2:20]
+        goods = [i for i in filter(isodd, 1:20)]
 
 ### Auto-tested problems
 
