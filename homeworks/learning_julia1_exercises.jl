@@ -107,6 +107,8 @@ a = [1,7]
     uc = unique(smash)
     cc = [count(x->x==ux, smash) for ux in uc]
     d =  Dict{Char,Int}(Pair.(uc,cc))   # this variable should be a dictionary
+    # in one line:
+    d = Dict((ux,count(x->x==ux, smash)) for ux in Set(smash))
     mostcommon = argmax(d)   # compute this from `d`
     @test keytype(d) == Char && valtype(d) == Int
     @test d['l'] == 3
