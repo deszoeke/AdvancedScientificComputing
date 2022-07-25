@@ -47,7 +47,8 @@ a = [1,7]
     @test eltype(rf) == Float64 && rf == r
 
     # Create a matrix equal to a 2x2 identity matrix (1 on the diagonal, zero on the corners)
-    M = [[1,0], [0,1]]
+    #M = [[1,0], [0,1]] # array of arrays!
+    M = [1 0; 0 1]
     @test size(M) == (2,2) && M[1,1] == M[2,2] == 1 && M[1,2] == M[2,1] == 0
 
     # Create a vector of `String`s that has 3 undefined elements, then make the middle one equal to "Julia"
@@ -92,22 +93,26 @@ a = [1,7]
     # Do not type the answer directly, generate it by exploiting Julia's string-manipulation functions
     animals = "dog cat opossum feline antelope chimp octopus salamander"
     # alphatize(animals) = join( sort( split(animals) ) , ' ')
-    alphatize(animals) = sort( split(animals) )
-    aanimals = alphatize(animals) # feel free to use multiple lines to solve this; `aanimals` should hold your final answer
+    alphatize(animals) = sort( filter(x->!in('u',x), split(animals)) ) # returns a Vector{SubString{String}}
+    aanimals = map(String, alphatize(animals)) # feel free to use multiple lines to solve this; `aanimals` should hold your final answer
     @test aanimals == ["antelope", "cat", "chimp", "dog", "feline", "salamander"]
 
     # Compute the sum of the ascii codes in `animals`, excluding spaces
-    sascii =
+    #sascii = sum(Int8.(filter(!isspace, [c for c in animals])))
+    sascii = sum(Int8.([c for c in animals if !isspace(c)]))
     @test sascii == 5257
 
     # What is the most common letter, excluding spaces, in `animals` above?
-    d =     # this variable should be a dictionary
-    mostcommon =    # compute this from `d`
+    smash = filter(!isspace, animals)
+    uc = unique(smash)
+    cc = [count(x->x==ux, smash) for ux in uc]
+    d =  Dict{Char,Int}(Pair.(uc,cc))   # this variable should be a dictionary
+    mostcommon = argmax(d)   # compute this from `d`
     @test keytype(d) == Char && valtype(d) == Int
     @test d['l'] == 3
     @test mostcommon == 'o'
 
     # Determine all the unique characters in `animals` using a Set (including the space ' ' this time)
-    chars =
+    chars = Set(animals)
     @test isa(chars, Set) && eltype(chars) == Char && length(chars) == 18 && 't' ∈ chars && 'z' ∉ chars
 end
