@@ -23,11 +23,24 @@ using Test
     # as the default `io` choice. See the style guide for more info about recommended best
     # practices for ordering arguments for Julia functions:
     # https://docs.julialang.org/en/v1/manual/style-guide/#Write-functions-with-argument-ordering-similar-to-Julia-Base
-    function rightjustify(io::IO, str::AbstractString, col::Integer = 70)
-        # fill me in!
+    "right justify at column col, truncating beginning of str, if necessary; stream to io"
+    function rightjustify(io::IO , str::AbstractString, col::Integer = 70)
+        write(io, _rightjustify(str, col))
     end
     # also define a method that doesn't have `io` supplied
-
+    "right justify at column col, truncating beginning of str, if necessary; send to stdout"
+    function rightjustify(str::AbstractString, col::Integer = 70)
+        write(stdout, _rightjustify(str, col))
+    end
+    "return ostr right-justified at column col, truncating beginning of str, if necessary"
+    function _rightjustify(str::AbstractString, col::Integer = 70)
+        s = strip(str)
+        ns = length(s)
+        npad = max(0, col - ns)
+        pad = " " ^ npad
+        ostr = pad * s[end-(col-1):end]
+    end
+    
     # here are my tests (don't modify this code)
     checkstr(ostr, refstr, len) = @test length(ostr) == len && endswith(ostr, refstr) && strip(ostr) == refstr
     for str in ("short", "kind of medium", "getting longer, but not too huge")
@@ -69,8 +82,23 @@ using Test
     # statements. My solution is less than 20 lines of code.
     # Hint: some of the better solutions might use `%` or `mod1` (read their help strings).
 
+           
     function robot_command(cmd, (x, y), dir)  # argument destructuring syntax: https://docs.julialang.org/en/v1/manual/functions/#Argument-destructuring
-        # you write the body
+        # look up direction from key dir
+        Ddir = Dict(("ENWS")[i] => circshift([1,0,-1,0], i-1) for i in 1:4)
+        xdir = Ddir[dir] # rotate all, advance by 1st 2 indices
+        for c in upper(cmd)
+            if c=='R'  # turn right by circshifting the direction vector
+                xdir = circshift(xdir, -1)
+            elseif c=='L'  # turn left by circshifting the direction vector
+                xdir = circshift(xdir, 1)
+            elseif c=='A'  # advance in the current direction
+                x += xdir[1]
+                y += xdir[2]
+            end
+        end
+        odir = [k for (k,v) in Ddir if v==xdir][1] # get the final ordinal direction
+        return (x,y), odir
     end
 
     # Single steps (these are deliberately written out in long form to avoid giving too much of the solution away)
