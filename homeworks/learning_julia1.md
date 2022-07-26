@@ -64,7 +64,8 @@ Answers here should be pasted into the Markdown file.  If you need an introducti
     
         goods = [i for i ∈ 1:2:20]
         goods = [i for i in filter(isodd, 1:20)]
-
+        goods = [i for i in 1:20 if isodd(i)]
+        
 ### Auto-tested problems
 
 The remaining homework problems are in a separate file, [`learning_julia1_exercises.jl`](learning_julia1_exercises.jl).
