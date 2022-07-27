@@ -249,7 +249,10 @@ using Test
     # - make `Gaussian(3, 5.0)` work. Read about `promote`.
     Gaussian(x,y) = Gaussian(promote(x,y)...)
     
-    # - make `Gaussian(3.0, 5.0)` print as `Gaussian(μ=3.0, σ=5.0)` ????
+    # - make `Gaussian(3.0, 5.0)` print as `Gaussian(μ=3.0, σ=5.0)`
+    # extend Base.show
+    Base.show(io::IO, g::Gaussian) = print(io, "Gaussian(μ=$(g.μ), σ=$(g.σ))")
+    
     #   and define an additional kwarg-constructor,
     #   with default values of 0 and 1 for `μ` and `σ`, respectively.
     Gaussian(; μ=0, σ=1) = Gaussian(μ, σ)
