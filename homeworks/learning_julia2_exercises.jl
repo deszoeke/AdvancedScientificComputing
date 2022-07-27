@@ -87,7 +87,7 @@ using Test
         # look up direction from key dir
         Ddir = Dict(("ENWS")[i] => circshift([1,0,-1,0], i-1) for i in 1:4)
         xdir = Ddir[dir] # rotate all, advance by 1st 2 indices
-        for c in upper(cmd)
+        for c in uppercase(cmd)
             if c=='R'  # turn right by circshifting the direction vector
                 xdir = circshift(xdir, -1)
             elseif c=='L'  # turn left by circshifting the direction vector
@@ -95,6 +95,8 @@ using Test
             elseif c=='A'  # advance in the current direction
                 x += xdir[1]
                 y += xdir[2]
+            else
+                error("robot command $c not recognized")
             end
         end
         odir = [k for (k,v) in Ddir if v==xdir][1] # get the final ordinal direction
@@ -129,7 +131,11 @@ using Test
     # Note that when you redefine structures, you may have to shut down your Julia session and restart it.
     # (Julia won't let you change an existing `struct` definition.)
     # a) create a new subtype of `Integer` called `MyInt`, one that stores an `Int` internally
-
+   
+    struct MyInt <: Integer
+        x::Integer
+    end
+    
     @test MyInt(3) isa Integer
     @test !ismutable(MyInt(3))
 
@@ -137,14 +143,20 @@ using Test
     #    You can either `import Base: ==` and write `==(a, b)` methods, or write your new
     #    methods using module qualification, `Base.:(==)(a, b)`. The `:` is needed only for operators;
     #    when extending other functions, you don't need `:`.
-
+    import Base: ==
+    ==(a::MyInt, b::Integer) = (a.x == b)
+    ==(a::Integer, b::MyInt) = (a == b.x)
+    ==(a::MyInt, b::MyInt) = (a.x == b.x)
+                
     @test MyInt(3) == 3
     @test 2 == MyInt(2)
     @test MyInt(1) != MyInt(2)   # this will follow automatically if you define `==`
     @test MyInt(-2) == Int16(-2)
 
     # c) extend `+` so that `MyInt` "wraps around" at 5: `MyInt(5) + 1` return `MyInt(1)` and then it starts counting up again.
-
+    import Base: +
+    +(a::MyInt, b::Integer) = MyInt(mod1(b + a.x, 5))
+    
     @test MyInt(1) + 1  === MyInt(2)
     @test MyInt(2) + 1  === MyInt(3)
     @test MyInt(3) + 1  === MyInt(4)
@@ -155,7 +167,8 @@ using Test
 
     # d) also extend the `typemax` "trait" for `MyInt`. Read the docs for `typemax`, and then do `@edit typemax(UInt8)`
     #    to see how such methods are implemented. Mimic that definition.
-
+    Base.typemax(::Type{MyInt}) = MyInt(5)
+                
     @test typemax(MyInt)    === MyInt(5)
     @test typemax(MyInt(2)) === MyInt(5)   # note you didn't have to write a method specifically for this test
     @test typemax(UInt8)    === 0xff       # just to make sure it's not broken
@@ -166,6 +179,11 @@ using Test
     #    - `g.σ` should return the standard deviation, a scalar also of type `T`
     #    Also, `T` should only be allowed to be a subtype of `Real`
 
+    struct Gaussian{T <: Real}
+        μ::T
+        σ::T
+    end
+                
     g = Gaussian(1.0, 0.5)
     @test g isa Gaussian{Float64}
     @test g.μ === 1.0
@@ -178,7 +196,10 @@ using Test
 
     # b) make objects of type Gaussian callable (review https://docs.julialang.org/en/v1/manual/methods/#Function-like-objects
     #    as needed), so that `g(x)` returns `exp(-(x - μ)^2/(2*σ^2))`.
-
+    function (g::Gaussian)(x)
+        exp(-(x - g.μ)^2/(2*g.σ^2))
+    end
+                    
     g = Gaussian(1.0, 0.5)
     @test g(2) ≈ 0.1353352832366127
     @test g(2.0) == g(2)
@@ -212,7 +233,11 @@ using Test
     # Now you write one: `f = gaussian_closure(μ, σ)` should return a function `f` such that
     # `f(x) == exp(-(x - μ)^2/(2*σ^2))`. Enforce the fact that both `μ` and `σ` must be `Real`,
     # as must `x`, but don't require them to be the same type.
-
+    function gaussian_closure(μ::Real, σ::Real)
+        g = Gaussian(μ, σ)
+        return x::Number -> g(x)
+    end
+           
     f = gaussian_closure(2, 5)
     @test f isa Function
     @test f(-3) ≈ 0.6065306597126334
@@ -222,6 +247,10 @@ using Test
 
     # Bonus points! (No need to turn anything in)
     # - make `Gaussian(3, 5.0)` work. Read about `promote`.
-    # - make `Gaussian(3.0, 5.0)` print as `Gaussian(μ=3.0, σ=5.0)` and define an additional kwarg-constructor,
+    Gaussian(x,y) = Gaussian(promote(x,y)...)
+    
+    # - make `Gaussian(3.0, 5.0)` print as `Gaussian(μ=3.0, σ=5.0)` ????
+    #   and define an additional kwarg-constructor,
     #   with default values of 0 and 1 for `μ` and `σ`, respectively.
+    Gaussian(; μ=0, σ=1) = Gaussian(μ, σ)
 end
